@@ -6,19 +6,19 @@ Data: 07/08/2023
 Descrição: Fazer um programa que calcula o salário líquido de um trabalhador a partir do salário bruto, descontos legais
 descontos opcionais, vale-trasporte e dependentes.
 """
-
-
 import re
 
-# Limites de Faixas do INSS
+# Limites de Faixas do INSS 08/2023
 INSS_FAIXA1 = 1320
 INSS_FAIXA2 = 2571.29
 INSS_FAIXA3 = 3856.94
 INSS_FAIXA4 = 7507.49
+# Limites de Faixas do IRRF 08/2023
 IRRF_FAIXA1 = 2112
 IRRF_FAIXA2 = 2826.65
 IRRF_FAIXA3 = 3751.05
 IRRF_FAIXA4 = 4664.68
+# Valor da dedução por dependente 08/2023
 VALOR_DEPENDENTE = 189.59
 
 
@@ -42,8 +42,8 @@ def main():
                 try:
                     # Replace por regex. A regex [^.|,\d] marca qualquer caractere EXCETO: ".", "," e números
                     resultado = object_type(re.sub(r'[^.|,\d]', '', input(input_string)))
-                except ValueError:
-                    print('Houve um erro de digitação, atente-se a números inteiros e não inteiros.')
+                except ValueError as e:
+                    print(f'{e}\nHouve um erro de digitação, atente-se a números inteiros e não inteiros.')
                 else:
                     # Debug
                     if mostrar != 0:
@@ -57,12 +57,16 @@ def main():
                     # Replace por regex. A regex [^a-zA-Z] marca qualquer caractere EXCETO letras de a até z
                     resultado = re.sub(r'[^a-zA-Z]', '', input(input_string)).lower()
                 except TypeError as e:
-                    print(e)
+                    print(f'{e}\nVerifique se não há erros na sua resposta e tente novamente.')
                 else:
-                    # Se a primeira letra for "s", encara-se a resposta como sim e retorna True, senão, False
-                    if resultado[0] == 's':
-                        return True
-                    return False
+                    try:
+                        # Se a primeira letra for "s", encara-se a resposta como sim e retorna True, senão, False
+                        if resultado[0] == 's':
+                            return True
+                    except IndexError as e:
+                        print(f'{e}\nUtilize apenas "Sim" ou "Não" para responder.')
+                    else:
+                        return False
 
     salario_bruto = verificar_input('Digite o salário bruto: R$', object_type=float)
 
@@ -140,7 +144,7 @@ def main():
 
     def calcular_descontos():
         """
-        Amalgamo de todos os cálculos anteriores.
+        Junção de todos os cálculos anteriores para obter o salário líquido.
         :return: Retorna em float o valor do salário líquido.
         """
         valor_inss = calcular_inss(salario_bruto)
@@ -161,6 +165,12 @@ def main():
         return descontado_inss_dep - valor_irrf - valor_vt - outros_descontos + valor_dependentes
 
     print(f'O salário líquido é: {calcular_descontos():.2f}')
+
+    # Reinicia ou encerra a aplicação dependendo da resposta
+    if verificar_input('Calcular outro salário? (Sim/Não)\nResposta: ', object_type=str):
+        main()
+    else:
+        exit()
 
 
 if __name__ == '__main__':
